@@ -5,6 +5,7 @@ import torch
 import threading
 from queue import Queue
 from transformers import Wav2Vec2ForSequenceClassification, Wav2Vec2FeatureExtractor
+from python_to_arduino import send_frustration_value
 
 # Initialize model and feature extractor
 model = Wav2Vec2ForSequenceClassification.from_pretrained(
@@ -91,14 +92,18 @@ def process_audio_chunk(chunk):
 
 def shift_frustration_level(emotion):
     global frustration_level
-    shift_down = ["angry", "disgust", "fearful", "sad"]
-    shift_up = ["calm", "happy", "neutral", "surprised"]
+    shift_down = ["calm", "happy", "neutral", "surprised"]
+    shift_up = ["angry", "disgust", "fearful", "sad"]
+
     if emotion in shift_down and frustration_level > 1:
         frustration_level -= 1
     elif (emotion in shift_up and frustration_level < 3):
         frustration_level += 1
         
     print("Frustration Level: ", frustration_level)
+    # send_frustration_value(frustration_level)
+    send_frustration_value(frustration_level, port='COM5', baudrate=9600)
+
 
 def realtime_processing():
     """Process audio chunks from the queue"""
@@ -119,6 +124,13 @@ def realtime_processing():
             shift_frustration_level(emotion)
             print(f"Recognized emotion: {emotion}")
 
+def check_enter_press():
+    """Check for Enter key presses and send frustration level"""
+    while True:
+        input()  # Waits for Enter key press
+        send_frustration_value(frustration_level, port='COM5', baudrate=9600)
+        print(f"Sent frustration level {frustration_level} to Arduino")
+
 
 if __name__ == "__main__":
     # Start audio stream
@@ -134,6 +146,7 @@ if __name__ == "__main__":
     with stream:
         print("Real-time emotion recognition started...")
         print("Press Ctrl+C to stop\n")
+        print("Press Enter to send current frustration level to Arduino.\n")
         
         # Start processing thread
         processing_thread = threading.Thread(
@@ -141,6 +154,12 @@ if __name__ == "__main__":
             daemon=True
         )
         processing_thread.start()
+
+        enter_thread = threading.Thread(
+            target=check_enter_press,
+            daemon=True
+        )
+        enter_thread.start()
         
         # Keep main thread alive
         try:

@@ -1,4 +1,6 @@
+#include <Servo.h>
 const int ledPin = 13;  // Onboard LED on Arduino Leonardo
+Servo servo;
 
 void setup() {
   Serial.begin(9600);
@@ -26,15 +28,24 @@ void loop() {
     switch (frustrationValue) {
       case 0:
         // Not Very Frustrated: blink once slowly
-        blinkLED(1, 500);
+        servo.attach(4);
+        servo.write(0);
+        delay(2000);
+        servo.detach();
         break;
       case 1:
         // Medium Frustrated: blink twice at a medium pace
-        blinkLED(2, 300);
+        servo.attach(6);
+        servo.write(0);
+        delay(2000);
+        servo.detach();
         break;
       case 2:
         // Very Frustrated: blink three times quickly
-        blinkLED(3, 200);
+        servo.attach(8);
+        servo.write(0);
+        delay(2000);
+        servo.detach();
         break;
       default:
         // For any unexpected value, do nothing or add error handling

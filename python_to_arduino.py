@@ -1,7 +1,7 @@
 import serial
 import time
 
-def send_frustration_value(frustration_value, port='/dev/tty.usbmodem1101', baudrate=9600):
+def send_frustration_value(frustration_value, port='COM5', baudrate=9600):
     try:
         ser = serial.Serial(port, baudrate, timeout=1)
         time.sleep(2)
@@ -15,4 +15,4 @@ def send_frustration_value(frustration_value, port='/dev/tty.usbmodem1101', baud
 if __name__ == "__main__":
  
     frustration_value = 2 
-    send_frustration_value(frustration_value, port='/dev/tty.usbmodem1101', baudrate=9600)
+    send_frustration_value(frustration_value, port='COM5', baudrate=9600)
